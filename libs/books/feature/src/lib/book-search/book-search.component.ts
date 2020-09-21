@@ -5,12 +5,12 @@ import {
   clearSearch,
   getAllBooks,
   ReadingListBook,
-  searchBooks,
+  BooksPartialState,
+  searchBooks
 } from '@tmo/books/data-access';
 import { FormBuilder } from '@angular/forms';
 import { Book } from '@tmo/shared/models';
 import { Observable } from 'rxjs';
-import { BooksPartialState } from '../../../../data-access/src/lib/+state/books.reducer';
 
 @Component({
   selector: 'tmo-book-search',
