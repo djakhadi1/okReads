@@ -16,13 +16,17 @@
 
 <ng-container *ngIf="searchTerm; else empty">
   <div class="book-grid">
-    <div class="book" data-testing="book-item" *ngFor="let b of books | async">
+    <div
+      class="book"
+      data-testing="book-item"
+      *ngFor="let b of books | async; let i = index"
+    >
       <div class="book--title">
-        <div role="heading" aria-level="1">{{ b.title }}</div>
+        {{ b.title }}
       </div>
       <div class="book--content">
         <div class="book--content--cover" role="img" aria-label="cover page">
-          <img src="{{ b.coverUrl }}" alt="Book image" />
+          <img src="{{ b.coverUrl }}" alt="Book cover URL" />
         </div>
         <div class="book--content--info">
           <div><strong>Author:</strong> {{ b.authors.join(',') }}</div>
@@ -33,6 +37,7 @@
           <p [innerHTML]="b.description"></p>
           <div>
             <button
+              id="{{ 'wantToRead_' + i }}"
               mat-flat-button
               color="primary"
               (click)="addBookToReadingList(b)"
