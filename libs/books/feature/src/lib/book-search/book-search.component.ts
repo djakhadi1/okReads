@@ -5,12 +5,12 @@ import {
   clearSearch,
   getAllBooks,
   ReadingListBook,
-  BooksPartialState,
-  searchBooks
+  searchBooks,
 } from '@tmo/books/data-access';
 import { FormBuilder } from '@angular/forms';
 import { Book } from '@tmo/shared/models';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'tmo-book-search',
@@ -19,13 +19,14 @@ import { Observable } from 'rxjs';
 })
 export class BookSearchComponent implements OnInit, OnDestroy {
   books: Observable<ReadingListBook[]>;
+  searchTextChanged = new Subject<string>();
 
   searchForm = this.fb.group({
     term: '',
   });
 
   constructor(
-    private readonly store: Store<BooksPartialState>,
+    private readonly store: Store,
     private readonly fb: FormBuilder
   ) {}
 
@@ -35,6 +36,11 @@ export class BookSearchComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.books = this.store.select(getAllBooks);
+    this.searchTextChanged
+      .pipe(debounceTime(500), distinctUntilChanged())
+      .subscribe((searchText) => {
+        this.setSearchText(searchText);
+      });
   }
 
   formatDate(date: void | string) {
@@ -47,8 +53,8 @@ export class BookSearchComponent implements OnInit, OnDestroy {
     this.store.dispatch(addToReadingList({ book }));
   }
 
-  searchExample() {
-    this.searchForm.controls.term.setValue('javascript');
+  setSearchText(searchText) {
+    this.searchForm.controls.term.setValue(searchText);
     this.searchBooks();
   }
 
@@ -62,6 +68,11 @@ export class BookSearchComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.books) {
       this.store.dispatch(clearSearch());
+      this.searchTextChanged.unsubscribe();
     }
+  }
+
+  autoSearch(searchCriteria: any) {
+    this.searchTextChanged.next(searchCriteria.target.value);
   }
 }
