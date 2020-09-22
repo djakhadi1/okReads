@@ -5,14 +5,12 @@ import {
   clearSearch,
   getAllBooks,
   ReadingListBook,
-  BooksPartialState,
-  searchBooks
+  searchBooks,
 } from '@tmo/books/data-access';
 import { FormBuilder } from '@angular/forms';
 import { Book } from '@tmo/shared/models';
 import { Observable, Subject } from 'rxjs';
-import { map, debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
-
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'tmo-book-search',
@@ -30,7 +28,7 @@ export class BookSearchComponent implements OnInit, OnDestroy {
   constructor(
     private readonly store: Store,
     private readonly fb: FormBuilder
-  ) { }
+  ) {}
 
   get searchTerm(): string {
     return this.searchForm.value.term;
@@ -40,8 +38,8 @@ export class BookSearchComponent implements OnInit, OnDestroy {
     this.books = this.store.select(getAllBooks);
     this.searchTextChanged
       .pipe(debounceTime(500), distinctUntilChanged())
-      .subscribe((searchstring) => {
-        this.setSearchText(searchstring);
+      .subscribe((searchText) => {
+        this.setSearchText(searchText);
       });
   }
 
@@ -55,8 +53,8 @@ export class BookSearchComponent implements OnInit, OnDestroy {
     this.store.dispatch(addToReadingList({ book }));
   }
 
-  setSearchText(searchstring) {
-    this.searchForm.controls.term.setValue(searchstring);
+  setSearchText(searchText) {
+    this.searchForm.controls.term.setValue(searchText);
     this.searchBooks();
   }
 
@@ -70,6 +68,7 @@ export class BookSearchComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.books) {
       this.store.dispatch(clearSearch());
+      this.searchTextChanged.unsubscribe();
     }
   }
 
